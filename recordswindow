@@ -1,0 +1,97 @@
+import tkinter as tk
+from tkinter import ttk
+import mysql.connector
+
+class RecordsWindow:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Records Dashboard")
+        self.root.geometry("800x600")
+        self.root.configure(bg="#C4DCC3")
+
+        # Create a Tab Frame to switch between views
+        tab_frame = tk.Frame(self.root, bg="#C4DCC3")
+        tab_frame.pack(pady=20)
+
+        # Buttons to switch between views
+        button_user_records = tk.Button(tab_frame, text="USER RECORDS", command=self.show_user_records, bg="#e0e0e0", font=("Arial", 10, "bold"))
+        button_user_records.pack(side=tk.LEFT, padx=10)
+
+        button_transaction_records = tk.Button(tab_frame, text="RECORDS", command=self.show_records, bg="#e0e0e0", font=("Arial", 10, "bold"))
+        button_transaction_records.pack(side=tk.LEFT)
+
+        # Container for the Treeview widgets (Table view)
+        self.table_frame = tk.Frame(self.root)
+        self.table_frame.pack(fill=tk.BOTH, expand=True)
+
+    # Function to show user records in a table
+    def show_user_records(self):
+        # Clear previous table
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
+        # Create the Treeview for User Records
+        user_tree = ttk.Treeview(self.table_frame, columns=("ID", "Username", "Password"), show="headings")
+        user_tree.heading("ID", text="ID")
+        user_tree.heading("Username", text="Username/Phone Number")
+        user_tree.heading("Password", text="Password")
+        user_tree.pack(fill=tk.BOTH, expand=True)
+
+        # Connect to MySQL to get user data
+        db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="retailing_system"
+        )
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM users")  # Adjust table name if necessary
+        users = cursor.fetchall()
+
+        # Insert data into the table
+        for user in users:
+            user_tree.insert("", tk.END, values=(user[0], user[1], user[2]))  # Assuming user[0] is ID, user[1] is Username, user[2] is Password
+
+        db.close()
+
+    # Function to show records from the records table in a table
+    def show_records(self):
+        # Clear previous table
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
+        # Create the Treeview for Records Table
+        records_tree = ttk.Treeview(self.table_frame, columns=("ID", "Username", "Promo Selected", "Amount Paid", "Change Amount", "Date and Time"), show="headings")
+        records_tree.heading("ID", text="ID")
+        records_tree.heading("Username", text="Username/Phone Number")
+        records_tree.heading("Promo Selected", text="Promo Selected")
+        records_tree.heading("Amount Paid", text="Amount Paid")
+        records_tree.heading("Change Amount", text="Change Amount")
+        records_tree.heading("Date and Time", text="Date and Time")
+        records_tree.pack(fill=tk.BOTH, expand=True)
+
+        # Connect to MySQL to get records data
+        db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="retailing_system"
+        )
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM records")  # Adjust table name if necessary
+        records = cursor.fetchall()
+
+        # Insert data into the table
+        for record in records:
+            records_tree.insert("", tk.END, values=(record[0], record[1], record[2], record[3], record[4], record[5]))  # Adjust according to your column order
+
+        db.close()
+
+# Main part to run the application
+def main():
+    root = tk.Tk()
+    records_window = RecordsWindow(root)
+    root.mainloop()
+
+# Run the main function
+main()
